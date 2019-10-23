@@ -1,0 +1,7 @@
+[package]
+name = "IdxFile"
+version = "0.1.0"
+authors = ["Jil Sahm <j.sahm@gmx.de>"]
+edition = "2018"
+
+[dependencies]
