@@ -1,7 +1,7 @@
 [package]
-name = "IdxFile"
+name = "idx-file"
 version = "0.1.0"
-authors = ["Jil Sahm <j.sahm@gmx.de>"]
+authors = ["Jil Sahm"]
 edition = "2018"
 
 [dependencies]
