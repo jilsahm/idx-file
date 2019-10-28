@@ -2,10 +2,29 @@ use std::fs::File;
 use std::io::{Read, BufReader, Seek, SeekFrom, Error};
 use std::path::{Path, PathBuf};
 
+#[derive(Debug, PartialEq)]
+pub enum Primitive {
+    UnsignedByte(u8),
+    SignedByte(i8),
+    Short(i16),
+    Integer(i32),
+    Float(f32),
+    Double(f64),
+    Unknown,
+}
+impl From<u8> for Primitive {
+    fn from(type_code: u8) -> Self {
+        match type_code {
+            0x08 => Primitive::UnsignedByte(0),
+            _ => Primitive::Unknown,
+        }
+    }
+}
+
 /// IdxReader being able to read an idx vector file.
 pub struct IdxReader {
     handle: PathBuf,
-    datatype: u8,
+    datatype: Primitive,
     dimensions: u8,
 }
 
@@ -15,7 +34,7 @@ impl IdxReader {
         let mut byte = vec![0u8];
         file.seek(SeekFrom::Start(2))?; // Skipping the first two zero-bytes
         file.read(&mut byte)?;
-        let datatype = byte[0];
+        let datatype = Primitive::from(byte[0]);
         file.read(&mut byte)?;
         let dimensions = byte[0];
 
@@ -38,15 +57,16 @@ pub struct Iter<'a> {
     buffer: BufReader<File>,
 }
 impl<'a> Iterator for Iter<'a> {
-    type Item = u8;
+    type Item = Primitive;
     fn next(&mut self) -> Option<Self::Item> {
-        Some(0u8)
+        //TODO
+        None
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{IdxReader, Path};
+    use super::{Primitive, IdxReader, Path};
     use std::path::PathBuf;
 
     fn get_path_to_testfile() -> PathBuf {        
@@ -68,7 +88,14 @@ mod tests {
     #[test]
     fn test_idxreader_metadata() {
         let reader = IdxReader::new(&get_path_to_testfile()).unwrap();
-        assert_eq!(8u8, reader.datatype);
+        assert_eq!(Primitive::UnsignedByte(0), reader.datatype);
         assert_eq!(1u8, reader.dimensions);
+    }
+
+    #[test]
+    fn test_iddreader_iter_next() {
+        let mut reader = IdxReader::new(&get_path_to_testfile()).unwrap();
+        let mut iter = reader.iter().unwrap();
+        assert_eq!(None, iter.next());
     }
 }
